@@ -56,6 +56,37 @@ export const VaultABI = [
     "stateMutability": "view",
     "type": "function"
   },
+  {
+    "inputs": [],
+    "name": "PAXG_TO_GRAMX_RATIO",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "amountPAXG", "type": "uint256" }
+    ],
+    "name": "convertPAXGToGRAMX",
+    "outputs": [
+      { "internalType": "uint256", "name": "amountGRAMX", "type": "uint256" }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "amountGRAMX", "type": "uint256" }
+    ],
+    "name": "convertGRAMXToPAXG",
+    "outputs": [
+      { "internalType": "uint256", "name": "amountPAXG", "type": "uint256" }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
   // Write functions
   {
     "inputs": [

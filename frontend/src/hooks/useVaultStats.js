@@ -66,9 +66,8 @@ const useVaultStats = (autoRefresh = true, refreshInterval = 30000) => {
         
         // Calculated metrics
         totalValueLocked: parseFloat(ethers.utils.formatEther(paxgBalance.add(lpReserves[0]))),
-        backingRatio: gramxSupply.gt(0) 
-          ? parseFloat(ethers.utils.formatEther(paxgBalance.mul(10000).div(gramxSupply))) / 100
-          : 100,
+        // Note: backingRatio is now handled by the contract's reserveRatio calculation
+        // which properly accounts for the PAXG:GRAMX conversion ratio
         liquidityDepth: parseFloat(ethers.utils.formatEther(lpReserves[0].add(lpReserves[1]))),
       };
 

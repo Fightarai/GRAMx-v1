@@ -68,9 +68,10 @@ const Mint = () => {
     enabled: !!address,
   });
 
-  // Calculate expected outputs
-  const gramxToReceive = amount ? parseFloat(amount) : 0;
-  const lpTokensToCreate = amount ? parseFloat(amount) : 0;
+  // Calculate expected outputs - 1 PAXG = 31.0115 GRAMX
+  const PAXG_TO_GRAMX_RATIO = 31.0115;
+  const gramxToReceive = amount ? parseFloat(amount) * PAXG_TO_GRAMX_RATIO : 0;
+  const lpTokensToCreate = amount ? parseFloat(amount) * 0.5 : 0; // Approximate LP tokens from PAXG contribution
   const totalPAXGNeeded = amount ? parseFloat(amount) : 0;
 
   const handleAmountChange = (event) => {
@@ -482,7 +483,7 @@ const Mint = () => {
                       2
                     </Box>
                     <Typography variant="body2">
-                      Receive equal amount of GRAMX tokens
+                      Receive GRAMX tokens (1 PAXG = 31.0115 GRAMX)
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

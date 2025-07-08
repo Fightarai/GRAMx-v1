@@ -73,6 +73,10 @@ contract GramxVault is ReentrancyGuard, Ownable, Pausable, EIP712 {
     uint256 public constant MIN_MINT_AMOUNT = 1e15; // 0.001 PAXG minimum
     uint256 public constant MAX_MINT_AMOUNT = 1000e18; // 1000 PAXG maximum
     
+    // Conversion ratio: 1 PAXG = 31.0115 grams of gold = 31.0115 GRAMX
+    // Using 18 decimals: 31.0115 * 1e18 = 31011500000000000000
+    uint256 public constant PAXG_TO_GRAMX_RATIO = 31011500000000000000; // 31.0115 with 18 decimals
+    
     // Events
     event Minted(address indexed user, uint256 amountPAXG, uint256 amountGRAMX, uint256 lpTokens);
     event Redeemed(address indexed user, uint256 amountGRAMX, uint256 amountPAXG);
@@ -163,8 +167,8 @@ contract GramxVault is ReentrancyGuard, Ownable, Pausable, EIP712 {
         // Transfer PAXG from user to vault
         paxg.safeTransferFrom(user, address(this), amountPAXG);
         
-        // Calculate GRAMX amount (1:1 ratio with PAXG)
-        uint256 gramxAmount = amountPAXG;
+        // Calculate GRAMX amount (1 PAXG = 31.0115 GRAMX)
+        uint256 gramxAmount = (amountPAXG * PAXG_TO_GRAMX_RATIO) / 1e18;
         uint256 totalMint = gramxAmount * 2; // Mint 2x: 1x to user, 1x for LP
         
         // Mint GRAMX tokens
@@ -190,8 +194,9 @@ contract GramxVault is ReentrancyGuard, Ownable, Pausable, EIP712 {
         require(amountGRAMX > 0, "GramxVault: amount must be greater than 0");
         require(gramx.balanceOf(msg.sender) >= amountGRAMX, "GramxVault: insufficient GRAMX balance");
         
-        // Calculate PAXG amount to return (1:1 ratio)
-        uint256 paxgAmount = amountGRAMX;
+        // Calculate PAXG amount to return (31.0115 GRAMX = 1 PAXG)
+        uint256 paxgAmount = (amountGRAMX * 1e18) / PAXG_TO_GRAMX_RATIO;
+        require(paxgAmount > 0, "GramxVault: PAXG amount too small");
         require(paxg.balanceOf(address(this)) >= paxgAmount, "GramxVault: insufficient PAXG reserves");
         
         // Burn GRAMX tokens
@@ -234,7 +239,7 @@ contract GramxVault is ReentrancyGuard, Ownable, Pausable, EIP712 {
     }
     
     /**
-     * @dev Get the current reserve ratio (PAXG reserves / Total GRAMX supply)
+     * @dev Get the current reserve ratio (PAXG reserves / PAXG equivalent of GRAMX supply)
      * @return ratio Reserve ratio in basis points (10000 = 100%)
      */
     function getReserveRatio() external view returns (uint256 ratio) {
@@ -242,7 +247,11 @@ contract GramxVault is ReentrancyGuard, Ownable, Pausable, EIP712 {
         if (totalSupply == 0) return 10000; // 100% if no tokens minted
         
         uint256 paxgReserves = paxg.balanceOf(address(this));
-        ratio = (paxgReserves * 10000) / totalSupply;
+        // Convert GRAMX supply to PAXG equivalent for proper ratio calculation
+        uint256 paxgEquivalent = (totalSupply * 1e18) / PAXG_TO_GRAMX_RATIO;
+        
+        if (paxgEquivalent == 0) return 10000; // 100% if equivalent is 0
+        ratio = (paxgReserves * 10000) / paxgEquivalent;
     }
     
     /**
@@ -286,10 +295,34 @@ contract GramxVault is ReentrancyGuard, Ownable, Pausable, EIP712 {
         if (gramxSupply == 0) {
             reserveRatio = 10000; // 100%
         } else {
-            reserveRatio = (paxgBalance * 10000) / gramxSupply;
+            // Convert GRAMX supply to PAXG equivalent for proper ratio calculation
+            uint256 paxgEquivalent = (gramxSupply * 1e18) / PAXG_TO_GRAMX_RATIO;
+            if (paxgEquivalent == 0) {
+                reserveRatio = 10000; // 100%
+            } else {
+                reserveRatio = (paxgBalance * 10000) / paxgEquivalent;
+            }
         }
     }
     
+    /**
+     * @dev Convert PAXG amount to GRAMX amount
+     * @param amountPAXG Amount of PAXG to convert
+     * @return amountGRAMX Equivalent amount of GRAMX
+     */
+    function convertPAXGToGRAMX(uint256 amountPAXG) external pure returns (uint256 amountGRAMX) {
+        amountGRAMX = (amountPAXG * PAXG_TO_GRAMX_RATIO) / 1e18;
+    }
+    
+    /**
+     * @dev Convert GRAMX amount to PAXG amount
+     * @param amountGRAMX Amount of GRAMX to convert
+     * @return amountPAXG Equivalent amount of PAXG
+     */
+    function convertGRAMXToPAXG(uint256 amountGRAMX) external pure returns (uint256 amountPAXG) {
+        amountPAXG = (amountGRAMX * 1e18) / PAXG_TO_GRAMX_RATIO;
+    }
+
     /**
      * @dev Generate EIP-712 message hash for signature verification
      * @param user User address

@@ -59,9 +59,11 @@ const Redeem = () => {
     enabled: !!address,
   });
 
-  // Calculate expected outputs
-  const paxgToReceive = amount ? parseFloat(amount) * (1 - parseFloat(vaultStats.redemptionFee) / 100) : 0;
-  const redemptionFeeAmount = amount ? parseFloat(amount) * parseFloat(vaultStats.redemptionFee) / 100 : 0;
+  // Calculate expected outputs - 1 PAXG = 31.0115 GRAMX, so 1 GRAMX = 1/31.0115 PAXG
+  const PAXG_TO_GRAMX_RATIO = 31.0115;
+  const paxgEquivalent = amount ? parseFloat(amount) / PAXG_TO_GRAMX_RATIO : 0;
+  const paxgToReceive = paxgEquivalent * (1 - parseFloat(vaultStats.redemptionFee) / 100);
+  const redemptionFeeAmount = paxgEquivalent * parseFloat(vaultStats.redemptionFee) / 100;
 
   const handleAmountChange = (event) => {
     const value = event.target.value;
@@ -276,7 +278,7 @@ const Redeem = () => {
                                   Redemption Fee ({vaultStats.redemptionFee}%)
                                 </Typography>
                                 <Typography variant="h6" color="warning.main" fontWeight="bold">
-                                  {redemptionFeeAmount.toFixed(4)} GRAMX
+                                  {redemptionFeeAmount.toFixed(6)} PAXG
                                 </Typography>
                               </Box>
                             </Grid>
@@ -298,7 +300,7 @@ const Redeem = () => {
                               }} 
                             />
                             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                              1 GRAMX = {(1 - parseFloat(vaultStats.redemptionFee) / 100).toFixed(3)} PAXG
+                              1 GRAMX = {(1 / PAXG_TO_GRAMX_RATIO * (1 - parseFloat(vaultStats.redemptionFee) / 100)).toFixed(6)} PAXG (after {vaultStats.redemptionFee}% fee)
                             </Typography>
                           </Box>
                         </CardContent>

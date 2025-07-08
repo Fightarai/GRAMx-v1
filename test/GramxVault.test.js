@@ -113,6 +113,8 @@ describe("GRAMX Vault System", function () {
 
     it("Should mint GRAMX tokens for PAXG", async function () {
       const mintAmount = ethers.utils.parseEther("10");
+      // 1 PAXG = 31.0115 GRAMX, so 10 PAXG = 310.115 GRAMX
+      const expectedGRAMX = ethers.utils.parseEther("310.115");
       
       const initialPAXGBalance = await mockPAXG.balanceOf(user1.address);
       const initialGRAMXBalance = await gramxToken.balanceOf(user1.address);
@@ -124,9 +126,9 @@ describe("GRAMX Vault System", function () {
         initialPAXGBalance.sub(mintAmount)
       );
 
-      // Check GRAMX was minted (1:1 ratio)
+      // Check GRAMX was minted (31.0115 GRAMX per 1 PAXG)
       expect(await gramxToken.balanceOf(user1.address)).to.equal(
-        initialGRAMXBalance.add(mintAmount)
+        initialGRAMXBalance.add(expectedGRAMX)
       );
 
       // Check vault received PAXG
@@ -134,7 +136,7 @@ describe("GRAMX Vault System", function () {
 
       // Check vault statistics were updated
       expect(await gramxVault.totalPAXGDeposited()).to.equal(mintAmount);
-      expect(await gramxVault.totalGRAMXMinted()).to.equal(mintAmount.mul(2)); // 2x because of LP
+      expect(await gramxVault.totalGRAMXMinted()).to.equal(expectedGRAMX.mul(2)); // 2x because of LP
     });
 
     it("Should enforce minimum mint amount", async function () {
@@ -166,10 +168,11 @@ describe("GRAMX Vault System", function () {
 
     it("Should emit Minted event", async function () {
       const mintAmount = ethers.utils.parseEther("10");
+      const expectedGRAMX = ethers.utils.parseEther("310.115");
       
       await expect(gramxVault.connect(user1).mint(mintAmount))
         .to.emit(gramxVault, "Minted")
-        .withArgs(user1.address, mintAmount, mintAmount, 0); // LP tokens would be 0 in mock
+        .withArgs(user1.address, mintAmount, expectedGRAMX, 0); // LP tokens would be 0 in mock
     });
   });
 
@@ -258,6 +261,8 @@ describe("GRAMX Vault System", function () {
 
     it("Should redeem GRAMX for PAXG", async function () {
       const redeemAmount = ethers.utils.parseEther("25");
+      // 25 GRAMX = 25/31.0115 PAXG ≈ 0.806096 PAXG
+      const expectedPAXG = ethers.utils.parseEther("25").mul(ethers.utils.parseEther("1")).div(ethers.utils.parseEther("31.0115"));
       
       const initialPAXGBalance = await mockPAXG.balanceOf(user1.address);
       const initialGRAMXBalance = await gramxToken.balanceOf(user1.address);
@@ -269,9 +274,9 @@ describe("GRAMX Vault System", function () {
         initialGRAMXBalance.sub(redeemAmount)
       );
 
-      // Check PAXG was returned
+      // Check PAXG was returned (converted from GRAMX)
       expect(await mockPAXG.balanceOf(user1.address)).to.equal(
-        initialPAXGBalance.add(redeemAmount)
+        initialPAXGBalance.add(expectedPAXG)
       );
     });
 
@@ -285,10 +290,11 @@ describe("GRAMX Vault System", function () {
 
     it("Should emit Redeemed event", async function () {
       const redeemAmount = ethers.utils.parseEther("25");
+      const expectedPAXG = ethers.utils.parseEther("25").mul(ethers.utils.parseEther("1")).div(ethers.utils.parseEther("31.0115"));
       
       await expect(gramxVault.connect(user1).redeem(redeemAmount))
         .to.emit(gramxVault, "Redeemed")
-        .withArgs(user1.address, redeemAmount, redeemAmount);
+        .withArgs(user1.address, redeemAmount, expectedPAXG);
     });
   });
 
@@ -308,7 +314,8 @@ describe("GRAMX Vault System", function () {
 
       const reserveRatio = await gramxVault.getReserveRatio();
       
-      // Should be 100% (50 PAXG backing 50 GRAMX)
+      // Should be 100% (50 PAXG backing 1550.575 GRAMX equivalent in PAXG terms)
+      // Since 50 PAXG mints 50 * 31.0115 = 1550.575 GRAMX, but 1550.575 GRAMX = 50 PAXG equivalent
       expect(reserveRatio).to.equal(10000);
     });
   });

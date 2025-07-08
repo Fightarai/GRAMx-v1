@@ -502,7 +502,7 @@ const Liquidity = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <VaultIcon fontSize="small" color="warning" />
                     <Typography variant="body2">
-                      <strong>Deep Reserves:</strong> Stable 1:1 PAXG backing maintained
+                      <strong>Deep Reserves:</strong> Stable PAXG backing maintained (1 PAXG = 31.0115 GRAMX)
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
