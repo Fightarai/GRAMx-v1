@@ -36,6 +36,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAccount, useBalance, useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi';
 import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
+import { useCurrency } from '../contexts/CurrencyContext';
+import DualCurrencyDisplay from '../components/DualCurrencyDisplay';
 
 // Mock contract addresses - these would come from config
 const CONTRACTS = {
@@ -52,6 +54,9 @@ const Mint = () => {
   const [signature, setSignature] = useState('');
   const [nonce, setNonce] = useState(0);
   const [allowance, setAllowance] = useState('0');
+  
+  // Currency context for real-time pricing
+  const { prices, formatDualCurrency, calculateTokenValue, loading: currencyLoading } = useCurrency();
 
   // Mock data - in real app, these would be from contract reads
   const [vaultStats, setVaultStats] = useState({
@@ -204,9 +209,69 @@ const Mint = () => {
           <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
             Mint GRAMX Tokens
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Deposit PAXG to mint GRAMX tokens backed by gold reserves
           </Typography>
+          
+          {/* Real-time Unit Prices */}
+          {!currencyLoading && prices && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <Card 
+                sx={{ 
+                  p: 2, 
+                  bgcolor: 'rgba(0, 210, 255, 0.05)',
+                  border: '1px solid rgba(0, 210, 255, 0.2)',
+                  mb: 2
+                }}
+              >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight="600">
+                      🔥 CURRENT PRICES
+                    </Typography>
+                    <Chip
+                      label="LIVE"
+                      size="small"
+                      color="primary"
+                      sx={{ 
+                        height: 16, 
+                        fontSize: '0.6rem',
+                        animation: 'pulse 2s infinite',
+                        '@keyframes pulse': {
+                          '0%': { opacity: 1 },
+                          '50%': { opacity: 0.7 },
+                          '100%': { opacity: 1 }
+                        }
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        1 PAXG =
+                      </Typography>
+                      <Typography variant="body2" fontWeight="600" color="warning.main">
+                        {formatDualCurrency(prices.paxg.usd, { compact: true })}
+                      </Typography>
+                    </Box>
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        1 GRAMX =
+                      </Typography>
+                      <Typography variant="body2" fontWeight="600" color="primary.main">
+                        {formatDualCurrency(prices.gramx.usd, { compact: true })}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Card>
+            </motion.div>
+          )}
         </Box>
       </motion.div>
 
@@ -304,7 +369,7 @@ const Mint = () => {
                             Expected Output
                           </Typography>
                           <Grid container spacing={2}>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <Box>
                                 <Typography variant="body2" color="text.secondary">
                                   GRAMX to Receive
@@ -312,9 +377,14 @@ const Mint = () => {
                                 <Typography variant="h6" color="primary.main" fontWeight="bold">
                                   {gramxToReceive.toFixed(4)} GRAMX
                                 </Typography>
+                                {!currencyLoading && prices && gramxToReceive > 0 && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    ≈ {formatDualCurrency(gramxToReceive * prices.gramx.usd, { compact: true })}
+                                  </Typography>
+                                )}
                               </Box>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <Box>
                                 <Typography variant="body2" color="text.secondary">
                                   LP Tokens Created
@@ -322,9 +392,26 @@ const Mint = () => {
                                 <Typography variant="h6" color="secondary.main" fontWeight="bold">
                                   ~{lpTokensToCreate.toFixed(4)} LP
                                 </Typography>
+                                {!currencyLoading && prices && lpTokensToCreate > 0 && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    ≈ {formatDualCurrency(lpTokensToCreate * prices.paxg.usd, { compact: true })}
+                                  </Typography>
+                                )}
                               </Box>
                             </Grid>
                           </Grid>
+                          
+                          {/* Conversion Rate Display */}
+                          {amount && gramxToReceive > 0 && (
+                            <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(255, 215, 0, 0.05)', borderRadius: 2, border: '1px solid rgba(255, 215, 0, 0.2)' }}>
+                              <Typography variant="body2" color="text.secondary" align="center">
+                                <strong>Conversion:</strong> {parseFloat(amount).toFixed(4)} PAXG → {gramxToReceive.toFixed(4)} GRAMX
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" align="center" sx={{ display: 'block' }}>
+                                Rate: 1 PAXG = 31.0115 GRAMX (based on 1 troy ounce = 31.0115 grams)
+                              </Typography>
+                            </Box>
+                          )}
                         </CardContent>
                       </Card>
                     </motion.div>

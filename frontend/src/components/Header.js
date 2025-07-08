@@ -24,7 +24,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { motion } from 'framer-motion';
-import { CurrencySelector, PriceTicker } from './DualCurrencyDisplay';
+import { CurrencySelector } from './DualCurrencyDisplay';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -62,11 +62,6 @@ const Header = () => {
       {/* Currency Selector for Mobile */}
       <Box sx={{ px: 2, pb: 2 }}>
         <CurrencySelector sx={{ width: '100%' }} />
-      </Box>
-      
-      {/* Price Ticker for Mobile */}
-      <Box sx={{ px: 2, pb: 2 }}>
-        <PriceTicker sx={{ width: '100%' }} />
       </Box>
       
       <List>
@@ -162,47 +157,41 @@ const Header = () => {
               </motion.div>
             </Box>
 
-            {/* Center Section - Desktop Navigation & Price Ticker */}
+            {/* Center Section - Desktop Navigation Only */}
             {!isMobile && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                {/* Navigation */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {navigation.map((item, index) => {
-                    const IconComponent = item.icon;
-                    const isActive = location.pathname === item.path;
-                    
-                    return (
-                      <motion.div
-                        key={item.name}
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {navigation.map((item, index) => {
+                  const IconComponent = item.icon;
+                  const isActive = location.pathname === item.path;
+                  
+                  return (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <Button
+                        component={Link}
+                        to={item.path}
+                        startIcon={<IconComponent />}
+                        sx={{
+                          color: isActive ? 'primary.main' : 'text.primary',
+                          backgroundColor: isActive ? 'rgba(0, 210, 255, 0.1)' : 'transparent',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 210, 255, 0.05)',
+                            transform: 'translateY(-2px)',
+                          },
+                          transition: 'all 0.3s ease',
+                          borderRadius: 2,
+                          px: 2,
+                        }}
                       >
-                        <Button
-                          component={Link}
-                          to={item.path}
-                          startIcon={<IconComponent />}
-                          sx={{
-                            color: isActive ? 'primary.main' : 'text.primary',
-                            backgroundColor: isActive ? 'rgba(0, 210, 255, 0.1)' : 'transparent',
-                            '&:hover': {
-                              backgroundColor: 'rgba(0, 210, 255, 0.05)',
-                              transform: 'translateY(-2px)',
-                            },
-                            transition: 'all 0.3s ease',
-                            borderRadius: 2,
-                            px: 2,
-                          }}
-                        >
-                          {item.name}
-                        </Button>
-                      </motion.div>
-                    );
-                  })}
-                </Box>
-                
-                {/* Price Ticker */}
-                <PriceTicker sx={{ mx: 2 }} />
+                        {item.name}
+                      </Button>
+                    </motion.div>
+                  );
+                })}
               </Box>
             )}
 

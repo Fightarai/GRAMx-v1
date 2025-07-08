@@ -15,6 +15,7 @@ import { CurrencyProvider } from './contexts/CurrencyContext';
 
 // Pages and Components
 import Header from './components/Header';
+import PriceBanner from './components/PriceBanner';
 import Dashboard from './pages/Dashboard';
 import Mint from './pages/Mint';
 import Redeem from './pages/Redeem';
@@ -166,8 +167,9 @@ function App() {
                     flexDirection: 'column',
                   }}
                 >
+                  <PriceBanner />
                   <Header />
-                  <Box component="main" sx={{ flex: 1, pt: 8 }}>
+                  <Box component="main" sx={{ flex: 1, pt: 12 }}>
                     <Routes>
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/mint" element={<Mint />} />
