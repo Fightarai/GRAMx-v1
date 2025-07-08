@@ -24,6 +24,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { motion } from 'framer-motion';
+import { CurrencySelector, PriceTicker } from './DualCurrencyDisplay';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,6 +58,17 @@ const Header = () => {
       >
         GRAMX VAULT
       </Typography>
+      
+      {/* Currency Selector for Mobile */}
+      <Box sx={{ px: 2, pb: 2 }}>
+        <CurrencySelector sx={{ width: '100%' }} />
+      </Box>
+      
+      {/* Price Ticker for Mobile */}
+      <Box sx={{ px: 2, pb: 2 }}>
+        <PriceTicker sx={{ width: '100%' }} />
+      </Box>
+      
       <List>
         {navigation.map((item) => {
           const IconComponent = item.icon;
@@ -150,65 +162,85 @@ const Header = () => {
               </motion.div>
             </Box>
 
-            {/* Desktop Navigation */}
+            {/* Center Section - Desktop Navigation & Price Ticker */}
             {!isMobile && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {navigation.map((item, index) => {
-                  const IconComponent = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <motion.div
-                      key={item.name}
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <Button
-                        component={Link}
-                        to={item.path}
-                        startIcon={<IconComponent />}
-                        sx={{
-                          color: isActive ? 'primary.main' : 'text.primary',
-                          backgroundColor: isActive ? 'rgba(0, 210, 255, 0.1)' : 'transparent',
-                          '&:hover': {
-                            backgroundColor: 'rgba(0, 210, 255, 0.05)',
-                            transform: 'translateY(-2px)',
-                          },
-                          transition: 'all 0.3s ease',
-                          borderRadius: 2,
-                          px: 2,
-                        }}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                {/* Navigation */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {navigation.map((item, index) => {
+                    const IconComponent = item.icon;
+                    const isActive = location.pathname === item.path;
+                    
+                    return (
+                      <motion.div
+                        key={item.name}
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
                       >
-                        {item.name}
-                      </Button>
-                    </motion.div>
-                  );
-                })}
+                        <Button
+                          component={Link}
+                          to={item.path}
+                          startIcon={<IconComponent />}
+                          sx={{
+                            color: isActive ? 'primary.main' : 'text.primary',
+                            backgroundColor: isActive ? 'rgba(0, 210, 255, 0.1)' : 'transparent',
+                            '&:hover': {
+                              backgroundColor: 'rgba(0, 210, 255, 0.05)',
+                              transform: 'translateY(-2px)',
+                            },
+                            transition: 'all 0.3s ease',
+                            borderRadius: 2,
+                            px: 2,
+                          }}
+                        >
+                          {item.name}
+                        </Button>
+                      </motion.div>
+                    );
+                  })}
+                </Box>
+                
+                {/* Price Ticker */}
+                <PriceTicker sx={{ mx: 2 }} />
               </Box>
             )}
 
-            {/* Wallet Connection */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ConnectButton
-                accountStatus={{
-                  smallScreen: 'avatar',
-                  largeScreen: 'full',
-                }}
-                chainStatus={{
-                  smallScreen: 'icon',
-                  largeScreen: 'full',
-                }}
-                showBalance={{
-                  smallScreen: false,
-                  largeScreen: true,
-                }}
-              />
-            </motion.div>
+            {/* Right Section - Currency Selector & Wallet */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* Currency Selector (Desktop only) */}
+              {!isMobile && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <CurrencySelector />
+                </motion.div>
+              )}
+              
+              {/* Wallet Connection */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <ConnectButton
+                  accountStatus={{
+                    smallScreen: 'avatar',
+                    largeScreen: 'full',
+                  }}
+                  chainStatus={{
+                    smallScreen: 'icon',
+                    largeScreen: 'full',
+                  }}
+                  showBalance={{
+                    smallScreen: false,
+                    largeScreen: true,
+                  }}
+                />
+              </motion.div>
+            </Box>
           </Toolbar>
         </Container>
       </AppBar>

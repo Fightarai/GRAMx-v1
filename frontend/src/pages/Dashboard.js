@@ -33,6 +33,8 @@ import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAccount, useBlockNumber } from 'wagmi';
 import GoldProofCard from '../components/GoldProofCard';
+import DualCurrencyDisplay from '../components/DualCurrencyDisplay';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 // Mock data for demonstration - in real app, this would come from the blockchain
 const mockVaultStats = {
@@ -70,7 +72,7 @@ const reserveBreakdown = [
   { name: 'PAXG in LP', value: 1228395, color: '#3A7BD5' },
 ];
 
-const StatCard = ({ title, value, subtitle, icon: Icon, trend, color = 'primary' }) => (
+const StatCard = ({ title, value, subtitle, icon: Icon, trend, color = 'primary', usdValue, showDualCurrency = false }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -83,9 +85,17 @@ const StatCard = ({ title, value, subtitle, icon: Icon, trend, color = 'primary'
             <Typography color="text.secondary" variant="body2" gutterBottom>
               {title}
             </Typography>
-            <Typography variant="h4" component="div" color={`${color}.main`} fontWeight="bold">
-              {value}
-            </Typography>
+            {showDualCurrency && usdValue ? (
+              <DualCurrencyDisplay 
+                usdAmount={usdValue} 
+                variant="compact"
+                showChange={false}
+              />
+            ) : (
+              <Typography variant="h4" component="div" color={`${color}.main`} fontWeight="bold">
+                {value}
+              </Typography>
+            )}
             {subtitle && (
               <Typography color="text.secondary" variant="body2" sx={{ mt: 1 }}>
                 {subtitle}
@@ -113,6 +123,7 @@ const Dashboard = () => {
   const { address, isConnected } = useAccount();
   const { data: blockNumber } = useBlockNumber();
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const { prices, formatDualCurrency, getTokenPrice, loading: currencyLoading } = useCurrency();
 
   useEffect(() => {
     setLastUpdated(new Date());
@@ -131,6 +142,15 @@ const Dashboard = () => {
   };
 
   const reserveStatus = getReserveRatioStatus(parseFloat(mockVaultStats.reserveRatio));
+
+  // Calculate USD values based on current prices
+  const tvlUSD = parseFloat(mockVaultStats.totalValueLocked.replace(/,/g, ''));
+  const gramxSupplyNum = parseFloat(mockVaultStats.totalGRAMXSupply.replace(/,/g, ''));
+  const lpTokensNum = parseFloat(mockVaultStats.lpTokensHeld.replace(/,/g, ''));
+  
+  // Calculate values in USD for dual currency display
+  const gramxValueUSD = gramxSupplyNum * (prices?.gramx?.usd || 0);
+  const lpValueUSD = lpTokensNum * (prices?.paxg?.usd || 0) * 0.5; // Approximate LP value
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -184,20 +204,24 @@ const Dashboard = () => {
           <StatCard
             title="Total Value Locked"
             value={`$${mockVaultStats.totalValueLocked}`}
-            subtitle="USD Value"
+            subtitle="Protocol TVL"
             icon={VaultIcon}
             trend="+12.5%"
             color="primary"
+            usdValue={tvlUSD}
+            showDualCurrency={!currencyLoading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="GRAMX Supply"
+            title="GRAMX Market Value"
             value={mockVaultStats.totalGRAMXSupply}
-            subtitle="Total minted tokens"
+            subtitle={`${gramxSupplyNum.toLocaleString()} tokens`}
             icon={TrendingUpIcon}
             trend="+8.3%"
             color="secondary"
+            usdValue={gramxValueUSD}
+            showDualCurrency={!currencyLoading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -212,12 +236,14 @@ const Dashboard = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="LP Tokens"
+            title="LP Value"
             value={mockVaultStats.lpTokensHeld}
-            subtitle="Liquidity provided"
+            subtitle={`${lpTokensNum.toLocaleString()} LP tokens`}
             icon={VaultIcon}
             trend="+15.7%"
             color="warning"
+            usdValue={lpValueUSD}
+            showDualCurrency={!currencyLoading}
           />
         </Grid>
       </Grid>

@@ -10,6 +10,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // Web3 Configuration
 import { wagmiConfig, chains } from './config/web3';
 
+// Currency Context
+import { CurrencyProvider } from './contexts/CurrencyContext';
+
 // Pages and Components
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
@@ -153,53 +156,55 @@ function App() {
         >
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Router>
-              <Box 
-                sx={{ 
-                  minHeight: '100vh',
-                  background: 'linear-gradient(135deg, #0A0E13 0%, #1A1F26 50%, #0A0E13 100%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <Header />
-                <Box component="main" sx={{ flex: 1, pt: 8 }}>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/mint" element={<Mint />} />
-                    <Route path="/redeem" element={<Redeem />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                  </Routes>
-                </Box>
-                <Footer />
-                
-                {/* Toast Notifications */}
-                <Toaster
-                  position="bottom-right"
-                  toastOptions={{
-                    duration: 4000,
-                    style: {
-                      background: '#1A1F26',
-                      color: '#FFFFFF',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '12px',
-                    },
-                    success: {
-                      iconTheme: {
-                        primary: '#4CAF50',
-                        secondary: '#FFFFFF',
-                      },
-                    },
-                    error: {
-                      iconTheme: {
-                        primary: '#F44336',
-                        secondary: '#FFFFFF',
-                      },
-                    },
+            <CurrencyProvider>
+              <Router>
+                <Box 
+                  sx={{ 
+                    minHeight: '100vh',
+                    background: 'linear-gradient(135deg, #0A0E13 0%, #1A1F26 50%, #0A0E13 100%)',
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
-                />
-              </Box>
-            </Router>
+                >
+                  <Header />
+                  <Box component="main" sx={{ flex: 1, pt: 8 }}>
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/mint" element={<Mint />} />
+                      <Route path="/redeem" element={<Redeem />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                    </Routes>
+                  </Box>
+                  <Footer />
+                  
+                  {/* Toast Notifications */}
+                  <Toaster
+                    position="bottom-right"
+                    toastOptions={{
+                      duration: 4000,
+                      style: {
+                        background: '#1A1F26',
+                        color: '#FFFFFF',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '12px',
+                      },
+                      success: {
+                        iconTheme: {
+                          primary: '#4CAF50',
+                          secondary: '#FFFFFF',
+                        },
+                      },
+                      error: {
+                        iconTheme: {
+                          primary: '#F44336',
+                          secondary: '#FFFFFF',
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              </Router>
+            </CurrencyProvider>
           </ThemeProvider>
         </RainbowKitProvider>
       </WagmiConfig>
