@@ -1,0 +1,34 @@
+{
+  "name": "gramx-vault",
+  "version": "1.0.0",
+  "description": "GRAMX Vault - A DeFi protocol for minting GRAMX tokens backed by PAXG with gasless transactions and automatic LP provision",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js",
+    "node": "hardhat node",
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start"
+  },
+  "keywords": ["defi", "gramx", "vault", "gasless", "ethereum", "uniswap"],
+  "author": "GRAMX Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "@openzeppelin/contracts-upgradeable": "^5.0.0",
+    "hardhat": "^2.19.0",
+    "dotenv": "^16.3.1",
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "ethers": "^6.8.0"
+  },
+  "dependencies": {
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "@ethersproject/signing-key": "^5.7.0",
+    "@ethersproject/hash": "^5.7.0"
+  }
+}
