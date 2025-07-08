@@ -155,6 +155,8 @@ contract GramxVault is ReentrancyGuard, Ownable, Pausable, EIP712 {
      * @param amountPAXG Amount of PAXG to deposit
      */
     function _executeMint(address user, uint256 amountPAXG) internal {
+        require(user != address(0), "GramxVault: invalid user address");
+        require(amountPAXG > 0, "GramxVault: amount must be greater than 0");
         require(amountPAXG >= MIN_MINT_AMOUNT, "GramxVault: amount below minimum");
         require(amountPAXG <= MAX_MINT_AMOUNT, "GramxVault: amount above maximum");
         

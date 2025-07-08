@@ -32,6 +32,7 @@ import {
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAccount, useBlockNumber } from 'wagmi';
+import GoldProofCard from '../components/GoldProofCard';
 
 // Mock data for demonstration - in real app, this would come from the blockchain
 const mockVaultStats = {
@@ -419,75 +420,8 @@ const Dashboard = () => {
         </Card>
       </motion.div>
 
-      {/* Proof of Reserves */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <Card sx={{ mt: 4, background: 'linear-gradient(135deg, rgba(0, 210, 255, 0.1) 0%, rgba(58, 123, 213, 0.1) 100%)' }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Box>
-                <Typography variant="h6" fontWeight="600" gutterBottom>
-                  Proof of Reserves
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Real-time verification of PAXG backing for all minted GRAMX tokens
-                </Typography>
-              </Box>
-              <SecurityIcon sx={{ fontSize: 48, color: 'primary.main' }} />
-            </Box>
-            
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Total PAXG Reserves
-                  </Typography>
-                  <Typography variant="h4" color="primary.main" fontWeight="bold">
-                    {(parseFloat(mockVaultStats.totalGRAMXSupply.replace(',', '')) * parseFloat(mockVaultStats.reserveRatio) / 100).toLocaleString()} PAXG
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    GRAMX Total Supply
-                  </Typography>
-                  <Typography variant="h4" color="secondary.main" fontWeight="bold">
-                    {mockVaultStats.totalGRAMXSupply} GRAMX
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Reserve Ratio
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="h4" color="success.main" fontWeight="bold">
-                      {mockVaultStats.reserveRatio}%
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min(parseFloat(mockVaultStats.reserveRatio), 300)}
-                      sx={{ 
-                        flex: 1, 
-                        height: 8, 
-                        borderRadius: 4,
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: parseFloat(mockVaultStats.reserveRatio) >= 200 ? '#4CAF50' : '#FF9800'
-                        }
-                      }}
-                    />
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {/* Enhanced Proof of Reserves */}
+      <GoldProofCard autoRefresh={true} refreshInterval={30000} />
     </Container>
   );
 };
